@@ -1,0 +1,5 @@
+#!/bin/bash
+#uruchomienie programu
+. ../Pobrane/root/bin/thisroot.sh
+. venv/bin/activate
+python runserver.py

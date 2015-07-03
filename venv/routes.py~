@@ -1,0 +1,166 @@
+from venv import app
+from flask import Flask, render_template, request, flash, session, redirect, url_for, jsonify
+#import LOGIN.forms
+from venv.forms import ContactForm, SignupForm, SigninForm
+from flask.ext.mail import Message, Mail
+from venv.models import db, User
+from venv.tasks import *
+from subprocess import Popen, PIPE
+#import ROOT
+import os
+import json
+os.environ['TERM'] = 'dumb'
+mail = Mail()
+
+@app.route('/')
+def home():
+    return render_template('home.html')
+
+@app.route('/home/_select')
+def select():
+    selected_histogram = request.args.get('a')
+    print selected_histogram
+    from subprocess import call 
+    call(['python', 'ExpCondAnalyser.py', '-r', str(selected_histogram), '-T', '-bla'])
+    return jsonify(result=selected_histogram)
+
+
+@app.route('/data/histogram0.json')
+#def histodata():
+ #   with open('venv/static/js/histogram.json') as data_file:    
+  #      content = json.loads(data_file.read().decode("utf-8-sig"))
+   #     print content
+    #    return jsonify(**content)
+def histodata0():
+   # sel = selected_histogram
+    final_content_0 = eval(Popen(['python', 'venv/get_json0.py'], stdout=PIPE).communicate()[0])
+  # import time
+   #time.sleep(5)
+    return jsonify(**final_content_0)
+
+@app.route('/data/histogram1.json')
+def histodata1():
+  #  sel = selected_histogram
+    final_content_1 = eval(Popen(['python', 'venv/get_json1.py'], stdout=PIPE).communicate()[0])
+    return jsonify(**final_content_1)
+
+@app.route('/data/histogram2.json')
+def histodata2():
+  #  sel = selected_histogram
+    final_content_2 = eval(Popen(['python', 'venv/get_json2.py'], stdout=PIPE).communicate()[0])
+    return jsonify(**final_content_2)
+
+@app.route('/data/histogram3.json')
+def histodata3():
+  #  sel = selected_histogram
+    final_content_3 = eval(Popen(['python', 'venv/get_json3.py'], stdout=PIPE).communicate()[0])
+    return jsonify(**final_content_3)
+
+@app.route('/data/histogram4.json')
+def histodata4():
+   # sel = selected_histogram
+    final_content_4 = eval(Popen(['python', 'venv/get_json4.py'], stdout=PIPE).communicate()[0])
+    return jsonify(**final_content_4)
+
+@app.route('/data/histogram5.json')
+def histodata5():
+  #  sel = selected_histogram
+    final_content_5 = eval(Popen(['python', 'venv/get_json5.py'], stdout=PIPE).communicate()[0])
+    return jsonify(**final_content_5)
+
+@app.route('/data/histogram6.json')
+def histodata6():
+  #  sel = selected_histogram
+    final_content_6 = eval(Popen(['python', 'venv/get_json6.py'], stdout=PIPE).communicate()[0])
+    return jsonify(**final_content_6)
+
+@app.route('/data/histogram7.json')
+def histodata7():
+  #  sel = selected_histogram
+    final_content_7 = eval(Popen(['python', 'venv/get_json7.py'], stdout=PIPE).communicate()[0])
+    return jsonify(**final_content_7)
+
+@app.route('/testdb')
+def testdb():
+  if db.session.query("1").from_statement("SELECT 1").all():
+    return 'It works.'
+  else:
+    return 'Something is broken.'
+
+@app.route('/signup', methods=['GET', 'POST'])
+def signup():
+  form = SignupForm()
+
+  if 'email' in session:
+    return redirect(url_for('profile')) 
+  if request.method == 'POST':
+    if form.validate() == False:
+      return render_template('signup.html', form=form)
+    else:
+      newuser = User(form.firstname.data, form.lastname.data, form.email.data, form.password.data)
+      db.session.add(newuser)
+      db.session.commit()
+       
+      session['email'] = newuser.email
+      return redirect(url_for('profile'))
+   
+  elif request.method == 'GET':
+    return render_template('signup.html', form=form)
+
+@app.route('/signin', methods=['GET', 'POST'])
+def signin():
+  form = SigninForm()
+
+  if 'email' in session:
+    return redirect(url_for('profile')) 
+  if request.method == 'POST':
+    if form.validate() == False:
+      return render_template('signin.html', form=form)
+    else:
+      session['email'] = form.email.data
+      return redirect(url_for('profile'))
+                 
+  elif request.method == 'GET':
+    return render_template('signin.html', form=form)
+
+@app.route('/profile')
+def profile():
+ 
+  if 'email' not in session:
+    return redirect(url_for('signin'))
+ 
+  user = User.query.filter_by(email = session['email']).first()
+  if user is None:
+    return redirect(url_for('signin'))
+  else:
+    return render_template('profile.html')
+
+@app.route('/signout')
+def signout():
+ 
+  if 'email' not in session:
+    return redirect(url_for('signin'))
+     
+  session.pop('email', None)
+  return redirect(url_for('home'))
+
+#@app.route('/contact', methods=['GET', 'POST'])
+#def contact():
+#  form = ContactForm()
+#
+#  if request.method == 'POST':
+#    if form.validate() == False:
+#      flash('All fields are required.')
+#      return render_template('contact.html', form=form)
+#    else:
+#      msg = Message(form.subject.data, sender='contact@example.com', #recipients=['your_email@example.com'])
+#      msg.body = """
+#      From: %s <%s>
+#      %s
+#      """ % (form.name.data, form.email.data, form.message.data)
+#      mail.send(msg)
+#
+#      return render_template('contact.html', success=True)
+#
+#  elif request.method == 'GET':
+#    return render_template('contact.html', form=form)

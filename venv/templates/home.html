@@ -1,0 +1,120 @@
+{% extends "layout.html" %}
+    {% block head %}
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/examples.css') }}">
+    {% endblock %}
+{% block content %}
+    <div class="page-header">
+        <h1>Experimental conditions</h1>
+    </div>
+<div class="row">
+    <div id="select">
+        <p>
+           Please put the RunNumber and press select: <input type=text size=10 name=a>
+            <a href=# id=select>SELECT</a>
+        </p>
+        <p>
+            Your selected RunNumber is:  <span id=result>?</span>
+            <input name="Load the plots" id="load_plots" value="Load the plots" type="button" />
+        </p>
+
+    </div>
+</div>
+
+<div class="row row-centered">
+    <div id="svg0" class="col-xs-6 col-centered col-min"></div>
+<div id="svg1" class="col-xs-6 col-centered col-min"></div>
+    <div id="svg2" class="col-xs-6 col-centered col-min"></div>
+<div id="svg3" class="col-xs-6 col-centered col-min"></div>
+    <div id="svg4" class="col-xs-6 col-centered col-min"></div>
+<div id="svg5" class="col-xs-6 col-centered col-min"></div>
+    <div id="svg6" class="col-xs-6 col-centered col-min"></div>
+<div id="svg7" class="col-xs-6 col-centered col-min"></div>
+</div>
+
+
+<!-- submitting RunNumber and reloading the page after change in the submitting form !-->
+<script type="text/javascript">
+  $(document).ready( function() {
+    $('input[name=a]').change(function() {
+         location.reload()
+     });
+  });
+  $(function() {
+    var submit_form = function(e) {
+      $.getJSON($SCRIPT_ROOT + '/home/_select', {
+        a: $('input[name="a"]').val(),
+      }, function(data) {
+        $('#result').text(data.result);
+        $('input[name=a]').focus().select();
+      });
+      return false;
+    };
+    $('a#select').bind('click', submit_form);
+    $('input[type=text]').bind('keydown', function(e) {
+      if (e.keyCode == 13) {
+        submit_form(e);
+      }
+    });
+    $('input[name=a]').focus();
+  });
+</script>
+
+
+<!-- disabling/enabling button script !-->
+<script>
+  function disableEnableBtn(ids)
+ {
+  // traverses the array with IDs
+  var nrids = ids.length;
+  for(var i=0; i<nrids; i++)
+  {
+    // registers onclick event to each button
+    if(document.getElementById(ids[i]))
+    {
+       document.getElementById(ids[i]).onclick = function()
+       {
+           this.setAttribute('disabled', 'disabled');     // disables the button by adding the 'disabled' attribute
+           this.innerHTML = 'Disabled';        // changes the button text
+           var idbtn = this.id;       // stores the button ID
+           $.getScript('../static/js/examples.js');
+           // calls a function after 2 sec. (2000 milliseconds)
+           setTimeout( function()
+                {
+                    document.getElementById(idbtn).removeAttribute('disabled');         // removes the "disabled" attribute
+                    document.getElementById(idbtn).innerHTML = 'Click';        // changes tne button text
+                }, 4000 );
+       }
+    }
+  }
+}
+// array with IDs of buttons
+var btnid = ['load_plots'];
+disableEnableBtn(btnid);      // calls the function
+</script>
+
+
+
+<!-- d3.js plotting scripts!-->
+  <script src="../static/js/lib/d3.v3.min.js"></script>
+  <script src="../static/js/lib/d3.chart.min.js"></script>
+  <script src="../static/js/dist/d3.chart.histograms.js?n=1"></script>
+
+<!-- google analytics scripts !-->
+<script src="http://www.google-analytics.com/ga.js" async="" type="text/javascript"></script>
+<script type="text/javascript">var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-941940-28']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();</script>
+
+<!-- boostrap scripts !-->
+<link href="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.1.1/css/bootstrap-combined.min.css" rel="stylesheet">
+<script src="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.1.1/js/bootstrap.min.js"></script>
+<script src="http://cdnjs.cloudflare.com/ajax/libs/prettify/188.0.0/prettify.js"></script>
+
+{% endblock %}
